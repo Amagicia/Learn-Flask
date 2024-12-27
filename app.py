@@ -12,15 +12,18 @@ app.permanent_session_lifetime = timedelta(minutes=10)  # Set session lifetime t
 
 @app.route("/", methods=["GET", "POST"])
 def login():
-    print("login")
-    if 'username' in session:
+    # print("login")
+    if 'Enrollment' in session:
         return redirect(url_for('index'))
     if request.method == "POST":
-        name = request.form.get("name")
+        Enrollment = request.form.get("name")
         password = request.form.get("password")
-        if name and password and check_name_pass(name, password):
+        if Enrollment and password and check_name_pass(Enrollment, password):
+            session['Enrollment'] = Enrollment
+            session['username'] = one_student(Enrollment)[0]
             session.permanent = True  # Make the session permanent
-            session['username'] = name
+            flash('Login Successful !!', 'success')  # Flash message for successful login
+          
             return redirect(url_for('index'))
         else:
             flash('Invalid Username or Password !!', 'warning')  # Flash message for unauthorized access
@@ -29,9 +32,92 @@ def login():
             # return "<h1>Invalid credentials</h1>"
     return render_template("login.html")
 
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if 'Enrollment' in session:
+        return redirect(url_for('index'))
+    if request.method == "POST":
+        name = request.form.get("name")
+        Enrollment = request.form.get("Enrollment")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        cpassword=request.form.get("cpassword")
+        phone=request.form.get("Phone")
+        address=request.form.get("address")
+        if password != cpassword:
+            flash('Password and Confirm Password do not match !!', 'warning')
+            return redirect(url_for('register'))
+        add_student(name, Enrollment, email, password,phone,address)
+        flash('Registration Successful !!', 'success')
+        return redirect(url_for('login'))
+    return render_template("register.html")
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    if 'Enrollment' not in session:
+        return redirect(url_for('login'))
+    try:
+        if request.method == "POST":
+            Enrollment = request.form.get("Enrollment")
+            combined=[]
+            if Enrollment:
+                search = one_student(Enrollment)
+                connection=connect_db()
+                mycursor = connection.cursor()
+                mycursor.execute("SHOW COLUMNS FROM registration")
+                columns = [column[0] for column in mycursor.fetchall()]
+                # print(search)
+                # print(columns)
+                # if search:
+                if not search:
+                    flash (f"Not Found Enrollment {Enrollment}")
+                    return redirect(url_for('search'))
+                combined = zip(columns,search)
+                print(12333333,combined)
+
+                # pr
+                return render_template("search.html", combined=combined)
+    except KeyError:
+            # print("Error: 'name' field is missing in the form data")
+        return "<h1>Form data error</h1>"
+    except Error as e:
+            # print(f"Error processing form data: {e}")
+        return "<h1>Internal Server Error</h1>"
+    return render_template("search.html")
+    # return rendallstd, columns = all_student()
+#     search = None
+#     combined = []
+    
+#     if request.method == "POST":
+#         try:
+#             name = request.form.get("name")
+#             search = one_student(name)
+#             if not search:
+#                 flash (f"Not Found Name {name}")
+#                 return redirect(url_for('index'))
+#             print(allstd)
+#             combined = zip(columns,search)
+
+#         except KeyError:
+#             print("Error: 'name' field is missing in the form data")
+#             return "<h1>Form data error</h1>"
+#         except Error as e:
+#             print(f"Error processing form data: {e}")
+#             return "<h1>Internal Server Error</h1>"
+#     return render_template("index.html", columns=columns, data=allstd,combined=combined, search=search)
+
+# er_template("search.html")
+        
+        
+        
+        
+        
+        
+        
+
 @app.route("/index", methods=["GET", "POST"])
 def index():
-    if 'username' not in session:
+    if 'Enrollment' not in session:
         return redirect(url_for('login'))
     
     allstd, columns = all_student()
@@ -45,14 +131,14 @@ def index():
             if not search:
                 flash (f"Not Found Name {name}")
                 return redirect(url_for('index'))
-            print(allstd)
+            # print(allstd)
             combined = zip(columns,search)
 
         except KeyError:
-            print("Error: 'name' field is missing in the form data")
+            # print("Error: 'name' field is missing in the form data")
             return "<h1>Form data error</h1>"
         except Error as e:
-            print(f"Error processing form data: {e}")
+            # print(f"Error processing form data: {e}")
             return "<h1>Internal Server Error</h1>"
     return render_template("index.html", columns=columns, data=allstd,combined=combined, search=search)
 
@@ -60,7 +146,7 @@ def index():
 
 @app.route("/logout")
 def logout():
-    session.pop('username', None)
+    session.pop('Enrollment', None)
     return redirect(url_for('login'))
 @app.route("/update", methods=["GET", "POST"])
 def update_password_route():
@@ -86,8 +172,8 @@ def update_password_route():
 
 @app.route("/session_data")
 def session_data():
-    # if 'username' not in session:
-        # return redirect(url_for('login'))
+    if 'Enrollment' not in session:
+        return redirect(url_for('login'))
     
     session_items = {key: session[key] for key in session}
     return render_template("session.html", session_items=session_items)

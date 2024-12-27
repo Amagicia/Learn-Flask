@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+    <style>
+        /* Style for the alert box */
+        .info-alert {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            /* Initially hidden */
+        }
+    </style>
+</head>
+
+<body>
+
+    <body>
+        <div class="container">
+            <!-- Title section -->
+            <div class="title">Registration</div>
+            <div class="content">
+                <!-- Registration form -->
+                <form action="/register" method="post">
+                    <div class="user-details">
+                        <!-- Input for Full Name -->
+                        <div class="input-box">
+                            <span class="details"><label for="st">Student Name</label> </span>
+                            <input id="st" type="text" name="name" placeholder="Enter your name" required />
+                        </div>
+                        <!-- Input for Username -->
+                        <div class="input-box">
+                            <span class="details"><label for="enr">Enrollment Number</label></span>
+                            <input id="enr" type="text" name="Enrollment" placeholder="Enter your Enrollment Number"
+                                required />
+                        </div>
+                        <!-- Input for Email -->
+                        <div class="input-box">
+                            <span class="details"><label for="email"> Email</label></span>
+                            <input id="email" type="text" name="email" placeholder="Enter your email" required />
+                        </div>
+                        <!-- Input for Phone Number -->
+                        <div class="input-box">
+                            <span class="details"><label for="ph">Phone Number</label></span>
+                            <input id="ph" type="text" name="Phone" placeholder="Enter your number" required />
+                        </div>
+                        <!-- Input for Password -->
+                        <div class="input-box">
+                            <span class="details"> <label for="pas">Password</label> </span>
+                            <input id="pas" type="password" name="password" placeholder="Enter your password"
+                                required />
+                        </div>
+                        <!-- Input for Confirm Password -->
+                        <div class="input-box">
+                            <span class="details"><label for="cpas">Confirm Password</label> </span>
+                            <input id="cpas" type="password" name="cpassword" placeholder="Confirm your password"
+                                required />
+                        </div>
+                        {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <div style="color: red;">
+                            {% for message in messages %}
+                            <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        <div class="input-box">
+                            <span class="details"> <label for="add">Address</label> </span>
+                            <input id="add" type="text" name="address" placeholder="Enter your address" required />
+                        </div>
+                    </div>
+
+
+                    <!-- Submit button -->
+                    <div class="button">
+                        <input type="submit" onclick=showInfoAlert() value="Register" />
+                    </div>
+                </form>
+                <div class="additional-options">
+                    <!-- <a href="#" onclick="alert('Password reset functionality would go here')">Forgot Password?</a> -->
+                    <br><br>
+                    <span>Don't have an account? </span>
+                    <div id="infoAlert" class="info-alert">Registration Successful !!!!</div>
+
+                    <a href="{{ url_for('login') }}" onclick=showInfoAlert()>Sign
+                        In</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // <div id="infoAlert" class="info-alert">This is an informational alert!</div>
+
+            // Show alert and hide after 3 seconds
+            function showInfoAlert() {
+                const alertBox = document.getElementById('infoAlert');
+                alertBox.style.display = 'block'; // Show the alert
+                setTimeout(() => {
+                    alertBox.style.display = 'none'; // Hide the alert after 3 seconds
+                }, 2000); // 3000ms = 3 seconds
+            }
+
+            // Trigger the alert
+            // showInfoAlert();
+        </script>
+    </body>
+
+</html>
