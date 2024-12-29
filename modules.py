@@ -34,13 +34,14 @@ def close_db(connection):
             # print("MySQL connection close ho gayi.")
 # Function to show all tables the table
 def all_tables_details():
-    
     connection = connect_db()
     if connection:
         try:
             mycursor = connection.cursor()
             # Check how many rows match the condition
-            mycursor.execute("select * from teacher")
+            # mycursor.execute("desc registration")
+            mycursor.execute("select * from registration")
+            
             count = mycursor.fetchall()
             for i in count:
                 print(i)
@@ -48,22 +49,17 @@ def all_tables_details():
             print(f"Error deleting rows: {e}")
 all_tables_details()
 
-#for update password of existing password
 
 def update_password(username, new_password):
     try:
         connection=connect_db()
         mycursor = connection.cursor()
         hashed_password = generate_password_hash(new_password)
-        # print(hashed_password)
         mycursor.execute("UPDATE registration SET password=%s WHERE name=%s", (hashed_password, username))
         connection.commit()
-        # print(f"Password updated successfully for {username}")
     except Error as e:
         print(f"Error updating password: {e}")
-    # finally:
-    #     mycursor.close()
-    #     close_db(connection)
+
 
 def one_student(Enrollment):
     try:
@@ -75,9 +71,6 @@ def one_student(Enrollment):
     except Error as e:
         print(f"Error fetching student: {e}")
         return None
-    # finally:
-    #     mycursor.close()
-    #     close_db(connection)
 
 def all_student():
     try:
@@ -115,3 +108,39 @@ def check_name_pass(Enrollment, password):
     if user and check_password_hash(user[5], password):  # Adjust the index if necessary
         return True
     return False
+
+
+def authenticate_user(username, password):
+    
+    connection=connect_db()
+    
+    cur = connection.cursor()
+    cur.execute("SELECT username,'admin' AS role FROM teacher WHERE username=%s AND password=%s", (username,password))
+        # return list(s) if s else None
+    teacher=cur.fetchone()
+    if teacher:
+        return list(teacher)
+    else:
+        mycursor=connection.cursor()
+        Cpass=check_name_pass(username,password)
+        if Cpass:
+            mycursor.execute("SELECT name,'student' AS role FROM registration WHERE Enrollment_NO=%s", (username,))
+            s = mycursor.fetchone()
+            # for i in s:
+            #     print(i)
+            if s:
+                return list(s)
+        else:
+            return None
+ 
+    return None
+# u=authenticate_user('25','12345')
+# print("/n",u)
+# u=authenticate_user('divya','123')
+# print(u)
+# u=authenticate_user('77','12345')
+# print(u)
+# u=authenticate_user('77','77')
+# print(u)
+# u=authenticate_user('2235','123425')
+# print(u)

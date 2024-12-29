@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stundent Profile</title>
+    <style>
+        table,
+        td {
+            border: 1px solid rgb(23, 22, 22);
+            border-collapse: collapse;
+        }
+
+        .cell {
+            color: #747272;
+            width: 65%;
+            /* Value width */
+            word-wrap: break-word;
+            /* Ensures words wrap */
+            word-break: break-word;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            /* Breaks words if needed */
+            max-width: 400px;
+            /* Limit cell width */
+            white-space: pre-wrap;
+            /* Preserves new lines */
+            font-size: 22px;
+            font-weight: 555;
+            padding: 20px;
+            padding-left: 30px;
+        }
+
+        .header {
+            background-color: #f0f0f0;
+            color: #d72971;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 666;
+            line-height: 1;
+            padding: 20px;
+            padding-left: 30px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Student Profile</h1>
+    {% set text = one[0] %}
+
+    <h2> Hey !!! {{text | capitalize}}</h2>
+
+
+    <h3>Registration Details</h3>
+    {%if one%}
+    <table border="1">
+        {% for header, cell in zip(columns, one) %}
+        <tr>
+            {% if loop.index != 6 %}
+            <td class="header">{{header}}</td>
+            {% endif %}
+            {% if loop.index != 6 %}
+            <td class="cell">{{cell | capitalize}}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+    <div><a href="/logout">logout</a></div>
+</body>
+
+</html>

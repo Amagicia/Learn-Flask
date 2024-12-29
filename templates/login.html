@@ -86,7 +86,9 @@
 
         </form>
         <div class="additional-options">
-            <a href="#" onclick="alert('Password reset functionality would go here')">Forgot Password?</a>
+            <a href="{{ url_for('update_password_route') }}"
+                onclick="alert('Password reset functionality would go here')">Update
+                Password?</a>
             <br><br>
             <span>Don't have an account? </span>
             <a href="{{ url_for('register') }}" onclick="alert('Registration functionality would go here')">Sign Up</a>

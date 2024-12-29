@@ -5,11 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration</title>
-    <!-- <script>
-        function resetForm() {
-            document.getElementById("searchForm").reset();
-        }
-    </script> -->
     <script>
         document.getElementById("myForm").onsubmit = function () {
             setTimeout(() => {
@@ -34,10 +29,7 @@
         </div>
         {% endif %}
         {% endwith %}
-
     </form>
-
-
     <table border="1">
         <thead>
             {% for da in columns %}
@@ -60,11 +52,8 @@
 
     <table border="1">
         <thead>
-            <!-- {% if columns %} -->
             <th>{{columns[0]}}</th>
             <th>{{search[0]}}</th>
-            <!-- <th>{{columns[1]}}</th> -->
-            <!-- {% endif %} -->
         </thead>
         <tbody>
             {% for c,d in combined %}
