@@ -5,15 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Profile</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            /* color: white; */
+        }
+
+        .menu {
+            /* background-color: #f2f2f2; */
+            padding: 10px;
+            margin-top: 40px;
+            text-align: center;
+
+        }
+
+        table,
+        td,
+        th {
+            padding: 12px;
+            /* font-family: Arial, Helvetica, sans-serif; */
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            font-weight: 600;
+            font-size: 20px;
+            color: rgb(47, 106, 142);
+            border-collapse: collapse;
+        }
+
+        h1 {
+            color: rgb(183, 5, 5);
+            margin-top: 45px;
+            text-align: left;
+            font-weight: 400;
+            padding-left: 45px;
+
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+
+        .center {
+            font-size: 30px;
+            color: rgb(2, 33, 52);
+            width: 100%;
+            padding-bottom: 22px;
+            margin: 44px auto;
+            text-align: center;
+            /* border-bottom: 2px solid #530ec2; */
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+
+        a {
+            text-decoration: none;
+            font-size: 24px;
+            color: #020245;
+            border: 1px solid #020245;
+            padding: 8px 10px;
+            margin: 20px;
+        }
+
+        .btn {
+            /* padding: 20px auto; */
+            background: #fffdfd;
+            margin: 20px;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>{{Name}}</h1>
-    <div><a href="/search" target="_blank">Search</a></div>
-    <div><a href="/logout">logout</a></div>
-    <div><a href="/download">download</a></div>
-    <div><a href="/update" target="_blank">update</a></div>
-    <div><a href="/session_data">Session Data</a></div>
+    <!-- /* From Uiverse.io by adamgiebl */ -->
+    <h1>Hey ! {{Name}}</h1>
+    <br><br>
+    {%if classname%}
+    <h6>Current Class - {{classname}}</h6>
+    {%endif%}
+    <div class="center">
+        <div>All Students</div>
+    </div>
+    <table border="1">
+        <thead>
+            {% for da in columns %}
+            {% if loop.index != 6 %}
+            <th class="header">{{da | capitalize}}</th>
+            {% endif %}
+
+            {% endfor %}
+        </thead>
+        <tbody>
+            {% for d in data %}
+            <tr>
+                {% for dak in d %}
+
+                {% if loop.index != 6 %}
+                <td>{{ dak | capitalize}}</td>
+                {% endif %}
+
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+    <div class="menu">
+        <div class="btn"><a href="/search" target="_blank">Search</a></div>
+        <div class="btn"><a href="/subject" target="_blank">Subject Details</a></div>
+        <div class="btn"><a href="/logout">logout</a></div>
+        <div class="btn"><a href="/download">download</a></div>
+        <div class="btn"><a href="/update" target="_blank">update</a></div>
+        <div class="btn"><a href="/session_data">Session Data</a></div>
+    </div>
+    <!-- /* From Uiverse.io by cssbuttons-io */ -->
+    <!-- <button class="learn-more">
+        <span class="circle" aria-hidden="true">
+            <span class="icon arrow"></span>
+        </span>
+        <span class="button-text"><a href="/search" target="_blank">Search</a></span>
+    </button> -->
+    <!-- /* From Uiverse.io by ElSombrero2 */ -->
+
+    </div>
 </body>
 
 </html>

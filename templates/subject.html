@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Subject</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Add Subject</h1>
+    <form action="/subject" method="post">
+
+        <label for="subjectid">Subject Code:</label>
+        <input type="text" name="subjectcode" id="subjectid" required>
+        <br>
+        <label for="time">Start Time:</label>
+        <input type="time" name="Stime" id="time" required>
+        <br>
+        <label for="Etime">End Time:</label>
+        <input type="time" name="Etime" id="Etime" required>
+        <br>
+        <label for="day">Day:</label>
+        <select name="day" id="day" required>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <!-- <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option> -->
+        </select>
+        <br>
+        <input type="submit" value="Add Subject">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div style="color: red;">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </form>
+
+
+    <h2>All Schedules</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject Code</th>
+                <th>Day</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+            <tr>
+                <td>{{ schedule[0] }}</td>
+                <td>{{ schedule[1] }}</td>
+                <td>{{ schedule[2] }}</td>
+                <td>{{ schedule[3] }}</td>
+                <td>{{ schedule[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

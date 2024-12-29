@@ -19,5 +19,8 @@
   "editor.formatOnPaste": true,
   "notebook.defaultFormatter": "njpwerner.autodocstring",
   "livePreview.showServerStatusNotifications": false,
-  "editor.cursorWidth": 4
+  "editor.cursorWidth": 4,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }
