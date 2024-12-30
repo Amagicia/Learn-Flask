@@ -17,6 +17,8 @@ from datetime import timedelta
 from modules import *
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from rfiid import *
+
 app = Flask(__name__)
 
 
@@ -100,8 +102,8 @@ def teacher():
         name = session["Name"]
         allstd, columns = all_student()
         classname = get_subject_by_current_day_and_time()
+        print(classname)
         if classname:
-            classname = classname[0]
             return render_template(
                 "teacherprofile.html",
                 classname=classname,
@@ -167,6 +169,39 @@ def subject():
 
         return render_template("subject.html", schedules=schedules)
     return redirect(url_for("login"))
+
+
+@app.route("/register_student", methods=["GET", "POST"])
+def register_student_route():
+    if "Name" not in session:
+        return redirect(url_for("login"))
+    role = session["Role"]
+    if role == "admin":
+        if request.method == "POST":
+            enrollment_no = request.form.get("enrollment_no")
+            session["enrollment_no"] = enrollment_no
+            abc = one_student(enrollment_no)
+            print(abc[4])
+            if False:
+                # if abc[4] != None:
+                flash("Enrollment Number already Have RFID !!", "danger")
+                return redirect(url_for("register_student_route"))
+            else:
+
+                # flash("Please scan the RFID tag.", "success")
+                status = read_rfid_from_arduino()
+                if status == "duplicate_entry":
+                    flash("RFID tag already registered !!", "danger")
+                # elif status:
+                flash("RFID tag registered successfully !!", "success")
+                # else:
+                #     flash("Error registering RFID tag !!", "danger")
+                session.pop("enrollment_no", None)
+
+                print(f"Enrollment number: {enrollment_no}")
+                # flash("Enrollment Number Stored", "success")
+                return render_template("registerrfid.html")
+    return render_template("registerrfid.html")
 
 
 def generate_pdf(rows):
@@ -253,29 +288,31 @@ def download_pdf():
 def search():
     if "Name" not in session:
         return redirect(url_for("login"))
-    try:
-        if request.method == "POST":
-            Enrollment = request.form.get("Enrollment")
-            combined = []
-            if Enrollment:
-                search = one_student(Enrollment)
-                connection = connect_db()
-                mycursor = connection.cursor()
-                mycursor.execute("SHOW COLUMNS FROM registration")
-                columns = [column[0] for column in mycursor.fetchall()]
-                if not search:
-                    flash(f"Not Found Enrollment {Enrollment}")
-                    return redirect(url_for("search"))
-                combined = zip(columns, search)
-                return render_template("search.html", combined=combined)
-    except KeyError:
-        print("Error: 'name' field is missing in the form data")
-        return "<h1>Form data error</h1>"
-    except Error as e:
-        print(f"Error: {e}")
-        print(f"Error processing form data: {e}")
-        return "<h1>Internal Server Error</h1>"
-    return render_template("search.html")
+    role = session["Role"]
+    if role == "admin":
+        try:
+            if request.method == "POST":
+                Enrollment = request.form.get("Enrollment")
+                combined = []
+                if Enrollment:
+                    search = one_student(Enrollment)
+                    connection = connect_db()
+                    mycursor = connection.cursor()
+                    mycursor.execute("SHOW COLUMNS FROM registration")
+                    columns = [column[0] for column in mycursor.fetchall()]
+                    if not search:
+                        flash(f"Not Found Enrollment {Enrollment}")
+                        return redirect(url_for("search"))
+                    combined = zip(columns, search)
+                    return render_template("search.html", combined=combined)
+        except KeyError:
+            print("Error: 'name' field is missing in the form data")
+            return "<h1>Form data error</h1>"
+        except Error as e:
+            print(f"Error: {e}")
+            print(f"Error processing form data: {e}")
+            return "<h1>Internal Server Error</h1>"
+    return render_template("login.html")
 
 
 @app.route("/index", methods=["GET", "POST"])

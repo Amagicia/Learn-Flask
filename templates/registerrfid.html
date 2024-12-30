@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Student</title>
+</head>
+
+<body>
+    <h1>Register Student</h1>
+    <form action="/register_student" method="post">
+        <label for="enrollment_no">Enrollment Number:</label>
+        <input type="text" name="enrollment_no" id="enrollment_no" required>
+        <br>
+        <input id="scanButton" type="submit" value="Register">
+    </form>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div style="color: red;">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- <div style="color: red;" id="message"></div>
+
+    <script>
+        const scanButton = document.getElementById('scanButton');
+        const message = document.getElementById('message');
+
+        scanButton.addEventListener('click', function () {
+            message.textContent = "Now scan the RFID card...";
+
+            // You would typically add your RFID reading logic here.
+            // This is a placeholder for where your RFID reader interaction would go.
+            // Example using setTimeout to simulate a delayed RFID read:
+            /*
+            setTimeout(function() {
+              // Simulate successful RFID read (replace with actual RFID data)
+              const rfidData = "1234567890";
+              message.textContent = "RFID Card Read: " + rfidData;
+            }, 3000); // Simulate 3-second read time
+            */
+
+        }, (3000));
+    </script> -->
+</body>
+
+</html>
