@@ -403,7 +403,7 @@ def update_password_route():
         user = one_student(name)
         print(user)
         if user and check_password_hash(user[5], password):
-            update_password(name, new_password)
+            # update_password(name, new_password)
             return "<h1>Password updated successfully</h1>"
         else:
             return "<h1>Current password is incorrect</h1>"
