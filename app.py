@@ -418,8 +418,3 @@ def session_data():
 
     session_items = {key: session[key] for key in session}
     return render_template("session.html", session_items=session_items)
-
-
-# if __name__ == "__main__":
-
-# app.run(debug=True)
