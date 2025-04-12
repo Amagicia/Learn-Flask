@@ -10,7 +10,7 @@ from flask import (
     session,
 )
 from fpdf import FPDF
-import mysql.connector
+from flask_debugtoolbar import DebugToolbarExtension
 from mysql.connector import Error
 from datetime import timedelta
 from modules import *
@@ -22,7 +22,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Initialize the Flask app
 
 app = Flask(__name__)
-
+toolbar = DebugToolbarExtension(app)
 
 app.secret_key = "12688fuy234y512cy5c12ucf"  # Secret key for session management
 app.permanent_session_lifetime = timedelta(minutes=10)  # Set session lifetime to 7 days
@@ -119,6 +119,8 @@ def teacher():
         name = session["Name"]
         allstd, columns = all_student()
         classname = get_subject_by_current_day_and_time()
+        # result = mycursor.fetchall()  # or .fetchone()
+
         print(classname)
         if classname:
             return render_template(
@@ -418,6 +420,6 @@ def session_data():
     return render_template("session.html", session_items=session_items)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    app.run(debug=True)
+# app.run(debug=True)

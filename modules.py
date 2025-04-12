@@ -53,9 +53,9 @@ def cheack_database():
             for i in count:
                 print(i)
 
-            mycursor.execute("DELETE FROM registration WHERE Enrollment_NO ='20'")
+            # mycursor.execute("DELETE FROM registration WHERE Enrollment_NO ='20'")
             # count = mycursor.fetchall()
-            connection.commit()
+            # connection.commit()
             print("Data deleted successfully")
 
             # print(count)
@@ -70,6 +70,7 @@ def cheack_database():
             close_db(connection)
 
 
+cheack_database()
 # cheack_database()
 # all_tables_details()
 # print(a)
@@ -251,7 +252,7 @@ def get_subject_by_current_day_and_time():
             mycursor.execute(
                 "SELECT Subject_name from subject where Subject_code=%s", (s,)
             )
-            subjectname = mycursor.fetchone()
+            subjectname = mycursor.fetchall()
             return subjectname[0] if subject else None
     except Error as e:
         print(f"Error fetching subject: {e}")
@@ -260,8 +261,51 @@ def get_subject_by_current_day_and_time():
         close_db(connection)
 
 
-# a=get_subject_by_current_day_and_time()
-# print(a)
+def get_subject_by_code(subject_code):
+    try:
+        connection = (
+            connect_db()
+        )  # Ensure you have a function to establish DB connection
+        mycursor = connection.cursor()
+
+        # Fetch the subject name based on the subject code
+        mycursor.execute(
+            "SELECT Subject_name FROM subject WHERE Subject_code = %s", (subject_code,)
+        )
+        subjectname = mycursor.fetchone()
+
+        return subjectname[0] if subjectname else None
+    except Error as e:
+        print(f"Error fetching subject: {e}")
+        return None
+    finally:
+        if connection:
+            close_db(connection)  # Ensure the connection is closed properly
+
+
+# Example usage:
+# subject_name = get_subject_by_code('SUB123')
+# print(subject_name)
+
+
+def fetch_all_attendance():
+    try:
+        connection = (
+            connect_db()
+        )  # Ensure you have a function to establish DB connection
+        mycursor = connection.cursor()
+
+        # Fetch all attendance records
+        mycursor.execute("SELECT * FROM attendance")
+        attendance_records = mycursor.fetchall()
+
+        return attendance_records
+    except Error as e:
+        print(f"Error fetching attendance: {e}")
+        return None
+    finally:
+        if connection:
+            close_db(connection)  # Ensure the connection is closed properly
 
 
 def fetch_all_attendance():
