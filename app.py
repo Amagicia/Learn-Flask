@@ -13,11 +13,13 @@ from fpdf import FPDF
 import mysql.connector
 from mysql.connector import Error
 from datetime import timedelta
-
 from modules import *
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from rfiid import *
+# from rfiid import *
+
+
+# Initialize the Flask app
 
 app = Flask(__name__)
 
@@ -28,9 +30,24 @@ import os
 
 # Reading an environment variable
 
+# card_id = read_rfid()
+# message = None
+
+# if card_id:
+#     success, msg = mark_attendance(card_id)
+#     message = {"text": msg, "type": "success" if success else "error"}
+
+
+@app.route("/new")
+def new():
+    """Home page with attendance list"""
+    attendance_records = fetch_all_attendance()
+    return render_template("new.html", attendance_records=attendance_records)
+
 
 @app.route("/", methods=["GET", "POST"])
 def login():
+
     if "Name" in session:
         print(f"Session Name: {session['Name']}, Role: {session.get('Role')}")
         print(1)
@@ -171,37 +188,37 @@ def subject():
     return redirect(url_for("login"))
 
 
-@app.route("/register_student", methods=["GET", "POST"])
-def register_student_route():
-    if "Name" not in session:
-        return redirect(url_for("login"))
-    role = session["Role"]
-    if role == "admin":
-        if request.method == "POST":
-            enrollment_no = request.form.get("enrollment_no")
-            session["enrollment_no"] = enrollment_no
-            abc = one_student(enrollment_no)
-            print(abc[4])
-            if False:
-                # if abc[4] != None:
-                flash("Enrollment Number already Have RFID !!", "danger")
-                return redirect(url_for("register_student_route"))
-            else:
+# @app.route("/register_student", methods=["GET", "POST"])
+# def register_student_route():
+#     if "Name" not in session:
+#         return redirect(url_for("login"))
+#     role = session["Role"]
+#     if role == "admin":
+#         if request.method == "POST":
+#             enrollment_no = request.form.get("enrollment_no")
+#             session["enrollment_no"] = enrollment_no
+#             abc = one_student(enrollment_no)
+#             print(abc[4])
+#             # if False:
+#             if abc[4] != None:
+#                 flash("Enrollment Number already Have RFID !!", "danger")
+#                 # return redirect(url_for("register_student_route"))
+#             else:
 
-                # flash("Please scan the RFID tag.", "success")
-                status = read_rfid_from_arduino()
-                if status == "duplicate_entry":
-                    flash("RFID tag already registered !!", "danger")
-                # elif status:
-                flash("RFID tag registered successfully !!", "success")
-                # else:
-                #     flash("Error registering RFID tag !!", "danger")
-                session.pop("enrollment_no", None)
+#                 # flash("Please scan the RFID tag.", "success")
+#                 status = read_rfid_from_arduino()
+#                 if status == "duplicate_entry":
+#                     flash("RFID tag already registered !!", "danger")
+#                 # elif status:
+#                 flash("RFID tag registered successfully !!", "success")
+#                 # else:
+#                 #     flash("Error registering RFID tag !!", "danger")
+#                 session.pop("enrollment_no", None)
 
-                print(f"Enrollment number: {enrollment_no}")
-                # flash("Enrollment Number Stored", "success")
-                return render_template("registerrfid.html")
-    return render_template("registerrfid.html")
+#                 print(f"Enrollment number: {enrollment_no}")
+#                 # flash("Enrollment Number Stored", "success")
+#                 return render_template("registerrfid.html")
+#     return render_template("registerrfid.html")
 
 
 def generate_pdf(rows):
@@ -312,7 +329,7 @@ def search():
             print(f"Error: {e}")
             print(f"Error processing form data: {e}")
             return "<h1>Internal Server Error</h1>"
-    return render_template("login.html")
+    return render_template("search.html")
 
 
 @app.route("/index", methods=["GET", "POST"])

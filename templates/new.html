@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            /* margin: 44px; */
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Attendance Records</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Enrollment Number</th>
+                <th>Name</th>
+                <th>Subject Code</th>
+                <th>Attendance Date</th>
+                <th>RFID Scan Time</th>
+                <th>Attendance Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.enrollment_no }}</td>
+                <td>{{ record.name }}</td>
+
+                <td>{{ record.subject_code }}</td>
+                <td>{{ record.attendance_date }}</td>
+                <td>{{ record.RFID_SCAN }}</td>
+                <td>{{ record.attendance_status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

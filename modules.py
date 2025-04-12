@@ -1,9 +1,25 @@
 # Database connection setup
 from binascii import Error
 from datetime import datetime
+import serial
 from werkzeug.security import generate_password_hash, check_password_hash
 
 import mysql.connector
+
+
+# Set up the serial connection (update COM port to match your system)
+arduino_port = "COM5"  # Update this to your Arduino's port
+baud_rate = 9600  # Must match the baud rate in the Arduino code
+
+# Arduino RFID reader
+try:
+    arduino = serial.Serial(arduino_port, baud_rate, timeout=1)
+    print("\n=== RFID Attendance System ===")
+    print("✓ RFID Reader Connected!")
+    print("Waiting for cards...")
+except:
+    print("✗ Could not connect to RFID Reader!")
+    arduino = None
 
 
 def connect_db():
@@ -13,7 +29,6 @@ def connect_db():
         )
         print("Connecting to database...")
         if connection.is_connected():
-            # print("MySQL se successfully connected!")
             return connection
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
@@ -23,15 +38,13 @@ def connect_db():
 def close_db(connection):
     if connection.is_connected():
         connection.close()
-        # print("MySQL connection closed.")
-
-        # print("MySQL connection close ho gayi.")
 
 
 # Function to show all tables the table
-def all_tables_details():
+def cheack_database():
     connection = connect_db()
     if connection:
+        print("ho gya connect")
         try:
             mycursor = connection.cursor()
             mycursor.execute("desc attendance")
@@ -40,11 +53,14 @@ def all_tables_details():
             for i in count:
                 print(i)
 
-            mycursor.execute("select * from attendance")
-            count = mycursor.fetchall()
-            print(count)
-            for i in count:
-                print(i)
+            mycursor.execute("DELETE FROM registration WHERE Enrollment_NO ='20'")
+            # count = mycursor.fetchall()
+            connection.commit()
+            print("Data deleted successfully")
+
+            # print(count)
+            # for i in count:
+            # print(i)
             # connection.commit()
             # print("Table created successfully")
             return True
@@ -54,26 +70,27 @@ def all_tables_details():
             close_db(connection)
 
 
+# cheack_database()
 # all_tables_details()
 # print(a)
 
 
-def update_password(
-    username, new_password
-):  # Yeh function password update karne ke liye hai
-    try:
-        connection = connect_db()  # Database se connection establish karte hain
-        mycursor = connection.cursor()  # Cursor object banate hain
-        hashed_password = generate_password_hash(
-            new_password
-        )  # Password ko hash karte hain
-        mycursor.execute(
-            "UPDATE registration SET password=%s WHERE name=%s",
-            (hashed_password, username),
-        )  # SQL query execute karte hain password update karne ke liye
-        connection.commit()  # Changes ko commit karte hain
-    except Error as e:  # Agar koi error aata hai to usko catch karte hain
-        print(f"Error updating password: {e}")  # Error message print karte hain
+# def update_password(
+#     username, new_password
+# ):  # Yeh function password update karne ke liye hai
+#     try:
+#         connection = connect_db()  # Database se connection establish karte hain
+#         mycursor = connection.cursor()  # Cursor object banate hain
+#         hashed_password = generate_password_hash(
+#             new_password
+#         )  # Password ko hash karte hain
+#         mycursor.execute(
+#             "UPDATE registration SET password=%s WHERE name=%s",
+#             (hashed_password, username),
+#         )  # SQL query execute karte hain password update karne ke liye
+#         connection.commit()  # Changes ko commit karte hain
+#     except Error as e:  # Agar koi error aata hai to usko catch karte hain
+#         print(f"Error updating password: {e}")  # Error message print karte hain
 
 
 def one_student(
@@ -132,7 +149,7 @@ def add_student(name, Enrollment, email, password, phone, address):
 
 def check_name_pass(Enrollment, password):
     user = one_student(Enrollment)
-    if user and check_password_hash(user[5], password):  # Adjust the index if necessary
+    if user and check_password_hash(user[5], password):  # Check password hash
         return True
     return False
 
@@ -173,9 +190,8 @@ def add_subject(subject_code, start_time, end_time, day):
         if connection:
             mycursor = connection.cursor()
             # Check if subject_code exists in the subjects table
-            mycursor.execute("ALTER TABLE schedule AUTO_INCREMENT = 1")
-
-            connection.commit()
+            # mycursor.execute("ALTER TABLE schedule AUTO_INCREMENT = 1")
+            # connection.commit()
             mycursor.execute(
                 "SELECT * FROM subject WHERE Subject_code=%s", (subject_code,)
             )
@@ -214,8 +230,8 @@ def get_subject_by_current_day_and_time():
             mycursor = connection.cursor()
             current_day = datetime.now().strftime("%A")
             current_time = datetime.now().strftime("%H:%M:%S")
-            print(current_day)
-            print(current_time)
+            # print(current_day)
+            # print(current_time)
             mycursor.execute(
                 """
                 SELECT subject_code 
@@ -248,77 +264,109 @@ def get_subject_by_current_day_and_time():
 # print(a)
 
 
-def RFID_A(timestamp, RFID):
+def fetch_all_attendance():
     try:
         connection = connect_db()
         if connection:
-            mycursor = connection.cursor()
-            mycursor.execute("SELECT * FROM registration WHERE RFID=%s", (RFID,))
-            student = mycursor.fetchone()
-            if not student:
-                print(f"Error: Student with RFID {RFID} not found")
-                return False
-            mycursor.execute(
-                "SELECT * FROM attendance WHERE RFID=%s AND Date=%s", (RFID, timestamp)
-            )
-            attendance = mycursor.fetchone()
-            if attendance:
-                print(f"Error: Attendance already marked for {RFID} on {timestamp}")
-                return False
-            mycursor.execute(
-                "SELECT * FROM schedule WHERE day=%s AND start_time <= %s AND end_time >= %s",
-                (
-                    datetime.now().strftime("%A"),
-                    datetime.now().strftime("%H:%M:%S"),
-                    datetime.now().strftime("%H:%M:%S"),
-                ),
-            )
-            subject = mycursor.fetchone()
-            if not subject:
-                print(
-                    f"Error: No subject scheduled for {datetime.now().strftime('%A')} at {datetime.now().strftime('%H:%M:%S')}"
-                )
-                return False
-            mycursor.execute(
-                "INSERT INTO attendance (RFID, Date, Subject_code) VALUES (%s, %s, %s)",
-                (RFID, timestamp, subject[0]),
-            )
-            connection.commit()
-            print(f"Attendance marked successfully for {RFID} on {timestamp}")
-            return True
+            cursor = connection.cursor(dictionary=True)
+            query = """
+                SELECT a.enrollment_no, r.name, a.subject_code, a.attendance_date, a.RFID_SCAN, a.attendance_status
+                FROM attendance a
+                JOIN registration r ON a.enrollment_no = r.Enrollment_NO
+            """
+            cursor.execute(query)
+            attendance_records = cursor.fetchall()
+            return attendance_records
     except Error as e:
-        print(f"Error marking attendance: {e}")
-        return False
+        print(f"Error fetching attendance records: {e}")
+        return None
     finally:
         close_db(connection)
 
 
-# def add_rfid(RFID, Enrollment):
-#     try:
-#         connection = connect_db()
-#         if connection:
-#             mycursor = connection.cursor()
-#             mycursor.execute(
-#                 "SELECT * FROM registration WHERE Enrollment_NO=%s", (Enrollment,)
-#             )
-#             student = mycursor.fetchone()
-#             if not student:
-#                 print(f"Error: Student with Enrollment {Enrollment} not found")
-#                 return False
-#             mycursor.execute("SELECT * FROM registration WHERE RFID_ID=%s", (RFID,))
-#             rfid = mycursor.fetchone()
-#             if rfid:
-#                 print(f"Error: RFID {RFID} already assigned to {rfid[1]}")
-#                 return False
-#             mycursor.execute(
-#                 "UPDATE registration SET RFID_ID=%s WHERE Enrollment_NO=%s",
-#                 (RFID, Enrollment),
-#             )
-#             connection.commit()
-#             print(f"RFID {RFID} assigned to {student[1]} successfully")
-#             return True
-#     except Error as e:
-#         print(f"Error assigning RFID: {e}")
-#         return False
-#     finally:
-#         close_db(connection)
+def mark_attendance(card_id):
+    """Mark attendance for the student"""
+    db = connect_db()
+    if not db:
+        print("✗ Database connection failed")
+        return False, "Database connection failed"
+
+    try:
+        cursor = connect_db.cursor(dictionary=True)
+
+        # Find student by RFID
+        cursor.execute("SELECT * FROM registration WHERE RFID_ID = %s", (card_id,))
+        student = cursor.fetchone()
+
+        if not student:
+            print(f"✗ Unknown Card: No student registered with ID {card_id}")
+            return False, "No student found with this card"
+
+        print(f"✓ Student Found: {student['Name']} ({student['Enrollment_NO']})")
+
+        # Check if already marked today
+        today = datetime.now().date()
+        cursor.execute(
+            """
+            SELECT * FROM attendance 
+            WHERE enrollment_no = %s 
+            AND attendance_date = %s
+        """,
+            (student["Enrollment_NO"], today),
+        )
+
+        if cursor.fetchone():
+            print(
+                f"! Already Present: {student['Name']} was marked present earlier today"
+            )
+            return False, f"{student['Name']} already marked present today"
+
+        # Mark attendance
+        current_time = datetime.now().time()
+        cursor.execute(
+            """
+            INSERT INTO attendance 
+            (enrollment_no, attendance_date, RFID_SCAN, attendance_status)
+            VALUES (%s, %s, %s, 'P')
+        """,
+            (student["Enrollment_NO"], today, current_time),
+        )
+
+        # Update total present
+        cursor.execute(
+            """
+            UPDATE registration 
+            SET Total_Present = Total_Present + 1 
+            WHERE Enrollment_NO = %s
+        """,
+            (student["Enrollment_NO"],),
+        )
+
+        db.commit()
+        print(
+            f"✓ Marked Present: {student['Name']} at {current_time.strftime('%I:%M:%S %p')}"
+        )
+        print(f"  Total Present: {student['Total_Present'] + 1} days")
+        print("-" * 40)
+        return True, f"Marked {student['Name']} present"
+
+    except Exception as e:
+        print(f"✗ Error: {e}")
+        return False, "Error marking attendance"
+    finally:
+        db.close()
+
+
+def read_rfid():
+    """Read RFID card number"""
+    if arduino and arduino.in_waiting:
+        try:
+            card_id = arduino.readline().decode("utf-8").strip()
+            if card_id:
+                print(
+                    f"\n[{datetime.now().strftime('%I:%M:%S %p')}] Card Detected: {card_id}"
+                )
+                return card_id
+        except:
+            print("Error reading card!")
+    return None
