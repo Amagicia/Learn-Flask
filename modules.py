@@ -7,6 +7,23 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 
 
+from dotenv import load_dotenv
+import os
+
+# Load .env vars
+load_dotenv()
+
+# app = Flask(__name__)
+
+# # Connect to MySQL
+# db = mysql.connector.connect(
+#     host=os.getenv("localhost"),
+#     user=os.getenv("root"),
+#     password=os.getenv("root@123"),
+#     database=os.getenv("attendance"),
+# )
+
+
 # Set up the serial connection (update COM port to match your system)
 arduino_port = "COM5"  # Update this to your Arduino's port
 baud_rate = 9600  # Must match the baud rate in the Arduino code
@@ -25,9 +42,12 @@ except:
 def connect_db():
     try:
         connection = mysql.connector.connect(
-            host="localhost", user="root", password="root@123", database="attendance"
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DB"),
         )
-        print("Connecting to database...")
+        # print("Connecting to database...")
         if connection.is_connected():
             return connection
     except Error as e:
@@ -41,57 +61,6 @@ def close_db(connection):
 
 
 # Function to show all tables the table
-def cheack_database():
-    connection = connect_db()
-    if connection:
-        print("ho gya connect")
-        try:
-            mycursor = connection.cursor()
-            mycursor.execute("desc attendance")
-            # mycursor.execute("delete from schedule where subject_code='BT301'")
-            count = mycursor.fetchall()
-            for i in count:
-                print(i)
-
-            # mycursor.execute("DELETE FROM registration WHERE Enrollment_NO ='20'")
-            # count = mycursor.fetchall()
-            # connection.commit()
-            print("Data deleted successfully")
-
-            # print(count)
-            # for i in count:
-            # print(i)
-            # connection.commit()
-            # print("Table created successfully")
-            return True
-        except Error as e:
-            print(f"Error deleting rows: {e}")
-        finally:
-            close_db(connection)
-
-
-cheack_database()
-# cheack_database()
-# all_tables_details()
-# print(a)
-
-
-# def update_password(
-#     username, new_password
-# ):  # Yeh function password update karne ke liye hai
-#     try:
-#         connection = connect_db()  # Database se connection establish karte hain
-#         mycursor = connection.cursor()  # Cursor object banate hain
-#         hashed_password = generate_password_hash(
-#             new_password
-#         )  # Password ko hash karte hain
-#         mycursor.execute(
-#             "UPDATE registration SET password=%s WHERE name=%s",
-#             (hashed_password, username),
-#         )  # SQL query execute karte hain password update karne ke liye
-#         connection.commit()  # Changes ko commit karte hain
-#     except Error as e:  # Agar koi error aata hai to usko catch karte hain
-#         print(f"Error updating password: {e}")  # Error message print karte hain
 
 
 def one_student(

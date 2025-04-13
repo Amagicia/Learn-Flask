@@ -26,16 +26,12 @@ toolbar = DebugToolbarExtension(app)
 
 app.secret_key = "12688fuy234y512cy5c12ucf"  # Secret key for session management
 app.permanent_session_lifetime = timedelta(minutes=10)  # Set session lifetime to 7 days
+
+from dotenv import load_dotenv
 import os
 
-# Reading an environment variable
-
-# card_id = read_rfid()
-# message = None
-
-# if card_id:
-#     success, msg = mark_attendance(card_id)
-#     message = {"text": msg, "type": "success" if success else "error"}
+# Load .env vars
+load_dotenv()
 
 
 @app.route("/new")
@@ -47,45 +43,36 @@ def new():
 
 @app.route("/", methods=["GET", "POST"])
 def login():
-
+    print("Connected to DB as:", os.getenv("MYSQL_USER"))
     if "Name" in session:
-        print(f"Session Name: {session['Name']}, Role: {session.get('Role')}")
-        print(1)
+        # print(f"Session Name: {session['Name']}, Role: {session.get('Role')}")
         if session.get("Role") == "admin":
-            print(2)
             return redirect(
                 url_for("teacher"),
             )
         else:
-            print(3)
+
             # name=session['Name']
             return redirect(url_for("student"))
-    print(33)
+
     if request.method == "POST":
-        print(4)
         Enrollment = request.form.get("name")
         password = request.form.get("password")
         if Enrollment and password:
-            print(5)
             u = authenticate_user(Enrollment, password)
-            print(u)
+            # print(u)
             if u == None:
-                print(6)
+
                 flash("Invalid Username or Password !!", "warning")
                 return render_template("login.html")
             else:
-                print(7)
                 session["Name"] = u[0]
                 session["Role"] = u[1]
                 session.permanent = True
-                print(u[1])
                 if u[1] == "student":
-                    print(8)
                     return redirect(url_for("student"))
                 elif u[1] == "admin":
-                    print(9)
                     return redirect(url_for("teacher"))
-    print(10)
     return render_template("login.html")
 
 
@@ -121,7 +108,7 @@ def teacher():
         classname = get_subject_by_current_day_and_time()
         # result = mycursor.fetchall()  # or .fetchone()
 
-        print(classname)
+        # print(classname)
         if classname:
             return render_template(
                 "teacherprofile.html",
@@ -281,8 +268,8 @@ def download_pdf():
     query = "SELECT * FROM registration"
     cursor.execute(query)
     rows = cursor.fetchall()
-    for i in rows:
-        print(i)
+    # for i in rows:
+    # print(i)
 
     # Check if rows exist
     if not rows:
@@ -401,7 +388,7 @@ def update_password_route():
         if new_password != confirm_password:
             return "<h1>New passwords do not match</h1>"
         user = one_student(name)
-        print(user)
+        # print(user)
         if user and check_password_hash(user[5], password):
             # update_password(name, new_password)
             return "<h1>Password updated successfully</h1>"
@@ -418,3 +405,7 @@ def session_data():
 
     session_items = {key: session[key] for key in session}
     return render_template("session.html", session_items=session_items)
+
+
+# if __name__ == "__main__":
+# app.run(debug=True)
